@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>UI Pencil - How to Build a Mini Maze Game Using HTML, CSS, and JavaScript</title>
+    <link rel="stylesheet" href="maze.css">
+
+</head>
+
+<body>
+
+    <div class="wrap">
+        <div class="main">
+            <div class="container"></div>
+            <div class="intro">
+                <div>
+                    Welcome to the maze! Find the way out using the arrow keys. Good luck!
+                    <div class="btn_start">start</div>
+                </div>
+            </div>
+        </div>
+
+        <br>
+        <br>
+        <div style="font-size: 15px;">Move through the maze game and find the end point by using the arrow keys on your
+            keyboard.</div>
+        <p style="font-size: 12px;">For the full step by step tutorial, check this link:<a
+                href="https://uipencil.com/2023/04/12/how-to-build-a-mini-maze-game-using-html-css-and-javascript/">click
+                me - back to tutorial</a> </p>
+        <br>
+        <br>
+
+        <p style="font-size: 10px;">Copyright Â© 2023 UiPencil all rights reserved.</p>
+    </div>
+
+
+    <script>
+
+        const button = document.querySelector('.btn_start');
+        const intro_msg = document.querySelector('.intro');
+        const container = document.querySelector(".container");
+        const main = document.querySelector(".main");
+        const gridSize = 200;
+        const startpoint = { x: 2, y: 4 };
+        const endpoint = { x: 4, y: 0 };
+
+
+
+        const maze = [
+            ["path_7_rgt", "path_hori", "path_hori", "path_hori", "path_7_lft"],
+            ["path_vert", "wall", "wall", "wall", "end"],
+            ["path_T_rgt", "path_hori", "path_T_down", "path_hori_lft", "wall"],
+            ["path_vert_up", "wall", "path_vert", "wall", "wall"],
+            ["wall", "path_hori_rgt", "path_cross", "path_hori", "path_7_lft"],
+            ["path_portal_2", "wall", "path_vert", "wall", "path_vert"],
+            ["path_L_rgt", "path_hori", "path_cross", "path_hori", "path_T_lft"],
+            ["wall", "wall", "path_vert", "wall", "path_portal_1"],
+            ["path_hori_rgt", "path_hori", "path_T_up", "path_hori_lft", "wall"],
+        ];
+
+
+
+        let maze_l2_length = 0;
+        for (let i = 0; i < maze.length; i++) {
+
+            for (let j = 0; j < maze[i].length; j++) {
+                const cell = document.createElement("div");
+                cell.classList.add(maze[i][j]);
+                container.appendChild(cell);
+            }
+        }
+
+        //Generate CSS dynamically
+        container.style.gridTemplateColumns = 'repeat(' + maze[0].length + ', ' + gridSize + 'px)';
+        container.style.gridTemplateRows = 'repeat(' + maze.length + ', ' + gridSize + 'px)';
+        main.style.width = gridSize + "px";
+        main.style.height = gridSize + "px";
+        intro_msg.style.width = gridSize + "px";
+        intro_msg.style.height = gridSize + "px";
+        container.style.left = - (startpoint.x * gridSize) + "px";
+        container.style.top = - (startpoint.y * gridSize) + "px";
+
+
+        button.addEventListener('click', () => {
+            intro_msg.style.display = "none";
+            startGame();
+        })
+
+        function startGame() {
+            let playerRow = startpoint.y;
+            let playerCol = startpoint.x;
+            let topPosition = container.offsetTop;
+            let leftPosition = container.offsetLeft;
+            document.addEventListener("keydown", (event) => {
+
+                if (!main.classList.contains("success")) {
+                    const key = event.key;
+                    if (key === "ArrowUp") {
+                        if (playerRow > 0 && maze[playerRow - 1][playerCol] !== "wall") {
+                            playerRow--;
+                            topPosition += gridSize;
+                            container.style.top = topPosition + "px";
+                        }
+                    } else if (key === "ArrowDown") {
+                        if (playerRow < maze.length - 1 && maze[playerRow + 1][playerCol] !== "wall") {
+                            playerRow++;
+                            topPosition -= gridSize;
+                            container.style.top = topPosition + "px";
+                        }
+                    } else if (key === "ArrowLeft") {
+                        if (playerCol > 0 && maze[playerRow][playerCol - 1] !== "wall") {
+                            playerCol--;
+                            leftPosition += gridSize;
+                            container.style.left = leftPosition + "px";
+
+                            main.classList.add("flip");
+
+                        }
+                    } else if (key === "ArrowRight") {
+                        if (playerCol < maze[0].length - 1 && maze[playerRow][playerCol + 1] !== "wall") {
+                            playerCol++;
+
+                            if (leftPosition >= -(gridSize * endpoint.x)) {
+                                leftPosition -= gridSize;
+                                leftPosition == -(gridSize * endpoint.x);
+                                container.style.left = leftPosition + "px";
+                            }
+
+                            main.classList.remove("flip");
+                        }
+                    }
+
+
+
+                    const portal_1 = { x: 4, y: (7 - 1) };
+                    const portal_2 = { x: 0, y: (5 + 1) };
+                    if (maze[playerRow][playerCol] === "path_portal_1") {
+                        playerCol = portal_2.x;
+                        playerRow = portal_2.y;
+                        leftPosition = - (portal_2.x) * gridSize;
+                        topPosition = - (portal_2.y) * gridSize;
+
+                        setTimeout(() => {
+                            main.classList.add("portal");
+                            container.classList.add("no_animation");
+                            container.style.top = topPosition + "px";
+                            container.style.left = leftPosition + "px";
+                            return false;
+                        }, 1000);
+                        setTimeout(() => {
+                            main.classList.remove("portal");
+                            container.classList.remove("no_animation");
+                            return false;
+                        }, 2500);
+                    }
+                    else if (maze[playerRow][playerCol] === "path_portal_2") {
+                        playerCol = portal_1.x;
+                        playerRow = portal_1.y;
+                        leftPosition = - (portal_1.x) * gridSize;
+                        topPosition = - (portal_1.y) * gridSize;
+
+                        setTimeout(() => {
+                            main.classList.add("portal");
+                            container.classList.add("no_animation");
+                            container.style.top = topPosition + "px";
+                            container.style.left = leftPosition + "px";
+
+                            return false;
+                        }, 1000);
+                        setTimeout(() => {
+                            main.classList.remove("portal");
+                            container.classList.remove("no_animation");
+                            return false;
+                        }, 2500);
+                    }
+                    else if (maze[playerRow][playerCol] === "end") {
+                        setTimeout(() => {
+                            main.classList.add("success");
+                            container.style.left = -(gridSize * endpoint.x) + "px";
+                            return false;
+                        }, 1000);
+                    }
+
+                }
+            });
+
+
+
+        }
+
+    </script>
+</body>
+
+</html>
